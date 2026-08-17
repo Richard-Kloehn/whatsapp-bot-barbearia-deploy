@@ -1,0 +1,31 @@
+services:
+  bot:
+    build: .
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.${TRAEFIK_HOST}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=3002
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PORT: 3002
+      NOME_BARBEARIA: ${NOME_BARBEARIA}
+      HORA_INICIO: ${HORA_INICIO}
+      HORA_FIM: ${HORA_FIM}
+      CRON_SECRET: ${CRON_SECRET}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL}
+      OPENROUTER_MODEL_CLASSIFICACAO: ${OPENROUTER_MODEL_CLASSIFICACAO}
+      PAINEL_SECRET: ${PAINEL_SECRET}
+      WHATSAPP_PROVIDER: evolution
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE}
+      EVOLUTION_WEBHOOK_URL: ${EVOLUTION_WEBHOOK_URL}
+      EVOLUTION_DEBUG_WEBHOOK: 'true'
+    restart: unless-stopped

@@ -1,0 +1,21 @@
+{
+  "name": "whatsapp-bot-barbearia",
+  "version": "4.2.6",
+  "description": "Bot WhatsApp com IA para agendamentos — Navalha's Barber Club",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm install",
+    "start": "node dist/index.js",
+    "test:multi": "node cenario-regressao-multi-pessoa.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^7.0.0",
+    "@whiskeysockets/baileys": "^6.7.18",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.23.2",
+    "node-cron": "^3.0.3",
+    "openai": "^4.67.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
