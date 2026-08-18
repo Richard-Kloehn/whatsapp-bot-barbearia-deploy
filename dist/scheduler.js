@@ -21,7 +21,12 @@ exports.iniciarScheduler = iniciarScheduler;
 const node_cron_1 = __importDefault(require("node-cron"));
 const database_1 = require("./database");
 const message_1 = require("./message");
-const whatsapp_1 = require("./whatsapp");
+// (fix) Mesma selecao de provedor usada em index.js — antes este arquivo importava
+// "./whatsapp" (Baileys) direto, entao no modo WHATSAPP_PROVIDER=evolution o isReady()
+// aqui checava um modulo Baileys que nunca era conectado, e o cron de lembretes nunca
+// disparava (sempre "WhatsApp nao esta conectado").
+const WHATSAPP_PROVIDER = String(process.env.WHATSAPP_PROVIDER || 'baileys').trim().toLowerCase();
+const whatsapp_1 = WHATSAPP_PROVIDER === 'evolution' ? require("./whatsapp-evolution") : require("./whatsapp");
 const HORA_INICIO = Number(process.env.HORA_INICIO ?? 8);
 const HORA_FIM = Number(process.env.HORA_FIM ?? 21);
 const MAX_POR_CICLO = 20;
