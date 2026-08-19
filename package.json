@@ -1,12 +1,14 @@
 {
   "name": "whatsapp-bot-barbearia",
-  "version": "4.2.6",
+  "version": "4.7.2",
   "description": "Bot WhatsApp com IA para agendamentos — Navalha's Barber Club",
   "main": "dist/index.js",
   "scripts": {
     "build": "npm install",
     "start": "node dist/index.js",
-    "test:multi": "node cenario-regressao-multi-pessoa.js"
+    "test:multi": "node cenario-regressao-multi-pessoa.js",
+    "test:unit": "node tests/unit.test.js",
+    "test:live": "node tests/live_conversation_test.js"
   },
   "dependencies": {
     "@hapi/boom": "^7.0.0",

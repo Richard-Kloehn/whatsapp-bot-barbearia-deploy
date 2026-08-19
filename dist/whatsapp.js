@@ -142,7 +142,10 @@ async function processarMensagemUsuario(phone, jid, texto, numeroConfiavel) {
         const resposta = await _mensagemHandler(phone, texto, numeroConfiavel);
         await delayDigitacao(resposta);
         if (sock) await sock.sendMessage(jid, { text: resposta });
-        console.log(`[bot-ia] Resposta enviada para ${phone}`);
+        console.log(`\n${'─'.repeat(80)}`);
+        console.log(`[bot-ia] 👤 CLIENTE (${phone}): ${texto.substring(0, 150)}${texto.length > 150 ? '...' : ''}`);
+        console.log(`[bot-ia] 🤖 BOT RESPONDEU: ${resposta.substring(0, 150)}${resposta.length > 150 ? '...' : ''}`);
+        console.log(`${'─'.repeat(80)}\n`);
     } catch (err) {
         console.error('[bot-ia] Erro:', err.message);
         try { if (sock) await sock.sendMessage(jid, { text: 'Desculpe, tive um problema. Tente novamente.' }); } catch { /* ok */ }
@@ -173,7 +176,7 @@ function agendarProcessamento(phone, jid, numeroConfiavel) {
     }
     const textoJunto = ac.textos.join('\n');
     _acumulador.delete(phone);
-    console.log(`[bot-ia] Mensagem de ${phone}: ${textoJunto.substring(0, 120)}`);
+    console.log(`[bot-ia] ⏳ Processando mensagem de ${phone} (${textoJunto.length} caracteres)...`);
     if (_processando.get(phone)) {
         _filaPendente.set(phone, { jid, texto: textoJunto, numeroConfiavel });
         return;
@@ -536,12 +539,32 @@ async function conectar() {
  */
 function iniciarKeepalive() {
     const INTERVALO = 4 * 60 * 1000; // 4 minutos
+    // (fix) Falhas consecutivas SO no keepalive (sem nenhum outro sintoma) sao normalmente
+    // inofensivas (um blip de rede isolado) — mas varias seguidas no mesmo periodo podem
+    // indicar que o proprio processo esta sob estresse (memoria/CPU no plano compartilhado),
+    // o que tambem costuma coincidir com quedas de conexao do WhatsApp. Conta falhas
+    // consecutivas para diferenciar "1 blip isolado" (nao preocupante) de "processo com
+    // problema" (vale investigar no painel da Hostinger).
+    let falhasConsecutivas = 0;
     setInterval(() => {
-        const req = http_1.default.get(`http://localhost:${PORT}/health`, (res) => {
+        const req = http_1.default.get(`http://localhost:${PORT}/health`, { timeout: 8000 }, (res) => {
             res.resume(); // descarta o corpo — só quer manter o processo vivo
+            if (falhasConsecutivas > 0) {
+                console.log(`[keepalive] Voltou a responder apos ${falhasConsecutivas} falha(s) consecutiva(s).`);
+            }
+            falhasConsecutivas = 0;
         });
+        req.on('timeout', () => req.destroy(new Error('timeout apos 8s')));
         req.on('error', (err) => {
-            console.warn('[keepalive] Ping falhou:', err.message);
+            falhasConsecutivas++;
+            // (fix) err.message vinha vazio para alguns tipos de erro de socket (ex: alguns
+            // ECONNRESET) — err.code costuma ter o motivo real (ECONNREFUSED, ETIMEDOUT etc)
+            // mesmo quando err.message nao tem nada util, entao mostra os dois.
+            const motivo = err.code || err.message || String(err);
+            console.warn(`[keepalive] Ping falhou (${falhasConsecutivas}x seguida(s)): ${motivo}`);
+            if (falhasConsecutivas === 5) {
+                console.warn('[keepalive] 5 falhas consecutivas — se isso persistir, vale checar uso de memoria/CPU do processo no painel da Hostinger (processo sob estresse tambem costuma coincidir com quedas de conexao do WhatsApp).');
+            }
         });
         req.end();
     }, INTERVALO);

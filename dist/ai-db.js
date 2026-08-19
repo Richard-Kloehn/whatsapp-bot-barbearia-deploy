@@ -905,4 +905,11 @@ async function buscarProximoHorario(barbeiroId, servicoIds, maxDias = 21, dataMi
     return { erro: `Nenhum horario disponivel nos proximos ${maxDias} dias${dataMinima ? ` a partir de ${dataMinima}` : ''}${barbeiroId ? ' com este barbeiro' : ''}${filtroPeriodo && filtroPeriodo.periodo ? ` no periodo pedido (${filtroPeriodo.periodo})` : ''}. Informe isso ao cliente e sugira entrar em contato direto com a barbearia.` };
 }
 
-module.exports = { listarBarbeirosServicos, listarTodosServicosAtivos, verificarDisponibilidade, verificarDisponibilidadeTodos, buscarProximoHorario, buscarInfoBarbearia, buscarRespostasBot, criarAgendamento, criarAgendamentoMultiplo, buscarAgendamento, cancelarAgendamento, nomeDiaSemanaPorData };
+module.exports = {
+    listarBarbeirosServicos, listarTodosServicosAtivos, verificarDisponibilidade, verificarDisponibilidadeTodos,
+    buscarProximoHorario, buscarInfoBarbearia, buscarRespostasBot, criarAgendamento, criarAgendamentoMultiplo,
+    buscarAgendamento, cancelarAgendamento, nomeDiaSemanaPorData,
+    // Exportadas adicionalmente (nao mudam nenhum comportamento existente) para permitir testes
+    // unitarios diretos das funcoes puras de data/hora/normalizacao — ver tests/unit.test.js.
+    generateTimeSlots, parseIntervalo, normalizarNome, normalizarTelefone, dataHoraFormatadaBrasilia, horarioNoFiltro,
+};
